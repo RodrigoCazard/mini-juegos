@@ -47,7 +47,7 @@ export const PrizeClaimForm = ({
             }
 
             try {
-                  const res = await fetch(`https://mini-juegos-test-deploy.vercel.app/api/formDataPrize?companyId=${cId}`, {
+                  const res = await fetch(`https://mini-juegos-sepia.vercel.app/api/formDataPrize?companyId=${cId}`, {
                         method: 'POST',
                         headers: {
                               'Content-Type': 'application/json',
