@@ -1,0 +1,18 @@
+// NOTE: The overrides section is used to disable the no-explicit-any rule for the API folder, because we need to use any for body and query parameters in the API routes.
+{
+  "extends": ["next/core-web-vitals", "next/typescript"],
+  "overrides": [
+    {
+      "files": ["src/api/**/*.ts", "src/api/**/*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    },
+    {
+      "files": ["src/app/components/QuestionsList/StartGame/Particles/*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GameCategory {
+  QA
+  ALTERNATIVE_QA
+  ALTERNATIVE_QA_WITHOUT_TIMER
+  NEW_ALTERNATIVE
+  ROULETTE
+  MEMORY
+}
+
+model Company {
+  id              Int     @id @default(autoincrement())
+  name            String
+  logo            String
+  backgroundColor String
+  companyFormId   String?
+  rouletteColors  String?
+
+  screenSavers   ScreenSaver[]
+  games          Game[]
+  formDataPrizes FormDataPrize[]
+  prizes         Prize[]
+  checkInForms   CheckInForm[]
+  users          User[]
+  socialMedias   SocialMedia[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ScreenSaver {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id])
+  path      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SocialMedia {
+  id        Int @id @default(autoincrement())
+  companyId Int
+
+  company   Company @relation(fields: [companyId], references: [id])
+  facebook  String?
+  instagram String?
+  whatsapp  String?
+  twitter   String?
+  linkedin  String?
+  web       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Prize {
+  id          Int     @id @default(autoincrement())
+  name        String
+  stock       Int
+  description String?
+  companyId   Int
+  company     Company @relation(fields: [companyId], references: [id])
+  gameId      Int?
+  game        Game?   @relation(fields: [gameId], references: [id])
+  probability Float?
+
+  image String?
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  FormDataPrize FormDataPrize[]
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  companyId    Int
+  company      Company  @relation(fields: [companyId], references: [id])
+  isExpired    Boolean  @default(false)
+  expiresAt    DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Game {
+  id        Int          @id @default(autoincrement())
+  company   Company      @relation(fields: [companyId], references: [id])
+  companyId Int
+  name      String
+  category  GameCategory @default(QA)
+
+  questions        Question[]
+  playerProgresses PlayerProgress[]
+  prizes           Prize[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Question {
+  id           Int      @id @default(autoincrement())
+  game         Game     @relation(fields: [gameId], references: [id])
+  gameId       Int
+  questionText String
+  questionType String
+  options      Option[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([gameId], name: "gameId")
+}
+
+model Option {
+  id         Int      @id @default(autoincrement())
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId Int
+  optionText String
+  isCorrect  Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([questionId], name: "questionId")
+}
+
+model PlayerProgress {
+  id         Int      @id @default(autoincrement())
+  game       Game     @relation(fields: [gameId], references: [id])
+  gameId     Int
+  playerName String
+  score      Int
+  createdAt  DateTime @default(now())
+}
+
+model FormDataPrize {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String
+  prize     Prize    @relation(fields: [prizeId], references: [id])
+  prizeId   Int
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Campo compuesto entre email y companyId, para evitar que se repitan premios
+  @@unique([email, companyId])
+}
+
+model CheckInForm {
+  id         Int      @id @default(autoincrement())
+  first_name String
+  last_name  String
+  email      String   @unique
+  age        Int
+  companyId  Int
+  company    Company  @relation(fields: [companyId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
